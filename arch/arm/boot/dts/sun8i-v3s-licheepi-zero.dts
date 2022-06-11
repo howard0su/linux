@@ -256,7 +256,7 @@
 		spi-max-frequency = <50000000>;
 		spi-cpol;
 		spi-cpha;
-		gpios-reset = <&pio 4 13 0>; // PE 13
+		gpios-reset = <&pio 4 13 GPIO_ACTIVE_HIGH>; // PE 13
 	};
 	msi001@2 {
 			compatible = "spidev";
