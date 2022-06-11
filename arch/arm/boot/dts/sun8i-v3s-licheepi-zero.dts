@@ -208,7 +208,7 @@
 };
 
 &i2s0 {
-	status = "disabled";
+	status = "okay";
 };
 
 &i2c0 {
@@ -257,5 +257,34 @@
 		spi-cpol;
 		spi-cpha;
 		gpios-reset = <&pio 4 13 0>; // PE 13
+	};
+	msi001@2 {
+			compatible = "spidev";
+			spi-max-frequency = <10000000>;
+			reg = <2>;
+	};
+	pe4312@3 {
+			compatible = "spidev";
+			spi-max-frequency = <10000000>;
+			reg = <3>;
+	};
+};
+
+&lradc {
+	vref-supply = <&reg_vcc3v3>;
+	status = "okay";
+
+	button-0 {
+		label = "Select";
+		linux,code = <KEY_SELECT>;
+		channel = <0>;
+		voltage = <1336000>;
+	};
+
+	button-1 {
+		label = "Start";
+		linux,code = <KEY_OK>;
+		channel = <0>;
+		voltage = <2000000>;
 	};
 };
