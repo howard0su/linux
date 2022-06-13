@@ -58,7 +58,7 @@
 		framebuffer-lcd {
 			compatible = "allwinner,simple-framebuffer",
 				     "simple-framebuffer";
-			allwinner,pipeline = "mixer0-lcd0";
+			allwinner,pipeline = "de0-lcd0";
 			clocks = <&display_clocks CLK_MIXER0>,
 				 <&ccu CLK_TCON0>;
 			status = "disabled";
@@ -356,11 +356,13 @@
 			uart0_pb_pins: uart0-pb-pins {
 				pins = "PB8", "PB9";
 				function = "uart0";
+				bias-pull-up;
 			};
 
 			uart2_pins: uart2-pins {
 				pins = "PB0", "PB1";
 				function = "uart2";
+				bias-pull-up;
 			};
 
 			mmc0_pins: mmc0-pins {
@@ -380,13 +382,23 @@
 			};
 
 			spi0_pins: spi0-pins {
-				pins = "PC0", "PC1", "PC2", "PC3";
+				pins = "PC0", "PC1", "PC2";
 				function = "spi0";
 			};
 
+			/omit-if-no-ref/
 			i2s0_pins: i2s0-pins {
 				pins = "PG10", "PG11", "PG12", "PG13";
 				function = "i2s";
+			};
+
+			/omit-if-no-ref/
+			lcd_rgb666_pins: lcd_rgb666_pins {
+				pins = "PD0", "PD1", "PD2", "PD3", "PD4",
+				       "PD5", "PD6", "PD7", "PD8", "PD9",
+				       "PD10", "PD11", "PD12", "PD13", "PD14",
+				       "PD15", "PD16", "PD17", "PD18", "PD19";
+				function = "lcd";
 			};
 		};
 

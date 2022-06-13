@@ -98,18 +98,17 @@
         compatible = "gpio-keys";
         pinctrl-names = "default";
         pinctrl-0 = <&key_pins>;
-        #address-cells = <1>;
-        #size-cells = <0>;
         // autorepeat;
         
-		button@0
+		button0
 		{
 			label = "Power";
 			linux,code = <KEY_ENTER>;
 			interrupt-parent = <&pio>;
 			interrupts = <6 6 IRQ_TYPE_EDGE_FALLING>; //PG6
         };
-		button@1
+
+		button1
 		{
 			label = "Headphone Det";
 			linux,code = <KEY_F1>;
@@ -118,24 +117,37 @@
 		};
 	};
 
-	rotary0@0 {
+	rotary0 {
         compatible = "rotary-encoder";
-		pinctrl-names = "default";
-        pinctrl-0 = <&rotary0_pins>;
-		gpios = <&pio 4 10 GPIO_ACTIVE_LOW>, <&pio 4 11 GPIO_ACTIVE_LOW>; /* PE10, PE11 */
+		gpios = <&pio 4 10 0>, <&pio 4 11 0>; /* PE10, PE11 */
         linux,axis = <0>; /* REL_X */
         rotary-encoder,encoding = "gray";
         rotary-encoder,relative-axis;
 	};
 
-	rotary1@0 {
+	rotary1 {
         compatible = "rotary-encoder";
-		pinctrl-names = "default";
-        pinctrl-0 = <&rotary1_pins>;
-		gpios = <&pio 4 9 GPIO_ACTIVE_LOW>, <&pio 4 12 GPIO_ACTIVE_LOW>; /* PE9, PE12 */
+		gpios = <&pio 4 9 0>, <&pio 4 12 0>; /* PE9, PE12 */
         linux,axis = <1>; /* REL_Y */
         rotary-encoder,encoding = "gray";
         rotary-encoder,relative-axis;
+	};
+
+	sound_i2s {
+		compatible = "simple-audio-card";
+		simple-audio-card,name = "IQDecoder";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,mclk-fs = <256>;
+
+		status = "okay";
+
+		simple-audio-card,cpu {
+			sound-dai=<&i2s0>;
+		};
+
+		simple-audio-card,codec {
+			sound-dai=<&ext_codec>;
+		};
 	};
 
 };
@@ -160,35 +172,32 @@
 };
 
 &usbphy {
-	// usb0_id_det-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>; // PF6
+	usb0_id_det-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>; // PF6
 	usb0_vbus_det-gpios = <&pio 6 8 GPIO_ACTIVE_HIGH>; // PG8
 	
 	status = "okay";
 };
 
 &pio {
+	compatible = "allwinner,sun8i-r11-pinctrl";
+
 	spi0_cs_pins: spi0_cs_pins {
-		pins = "PC3", "PB10";
+		pins = "PC2", "PB10", "PE2", "PG9";
 		function = "gpio_out";
 	};
 
 	pwm0_pin: pwm0-pin {
 		pins = "PB4";
-		function = "pwm";
-	};
-
-	rotary0_pins: rotary0_pins {
-		pins = "PE10", "PE11";
-		function = "gpio_in";
-	};
-
-	rotary1_pins: rotary1_pins {
-		pins = "PE9", "PE12";
-		function = "gpio_in";
+		function = "pwm0";
 	};
 
 	key_pins: key_pins {
 		pins = "PB2", "PG6";
+		function = "gpio_in";
+	};
+
+	touch_pins: touch_pins {
+		pins = "PB1";
 		function = "gpio_in";
 	};
 };
@@ -199,7 +208,18 @@
 	status = "okay";
 };
 
+&tcon0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&lcd_rgb666_pins>;
+	status = "okay";
+};
+
 &codec {
+	allwinner,audio-routing =
+		"Headphone", "HP",
+		"Headphone", "HPCOM",
+		"MIC1", "Mic",
+		"Mic", "HBIAS";
 	status = "okay";
 };
 
@@ -208,10 +228,13 @@
 };
 
 &i2s0 {
+	sound-dai = <&ext_codec>;
 	status = "okay";
 };
 
 &i2c0 {
+	status = "okay";
+
 	/* ... */
 	cyttsp@24 {
 		compatible = "cypress,cyttsp-i2c";
@@ -235,9 +258,12 @@
 	};
 
 	ext_codec: codec@4c {
+		#sound-dai-cells = <0>;
 		compatible = "ti,tlv320adc6140";
 		reg = <0x4c>;
 		ti,vref-source = <0>;
+		ti,gpi-config = <0 0 0 0>;
+		ti,gpio-config = <0 0>;
 		reset-gpios = <&pio 4 8 GPIO_ACTIVE_HIGH>; // PE 8
 	};
 };
@@ -246,28 +272,35 @@
 	status ="okay";
 
 	pinctrl-names = "default";
-	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
+	pinctrl-0 = <&spi0_pins>;
 	//             PC3                        PB10                        PE2                           PG9
 	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 1 10 GPIO_ACTIVE_HIGH>, <&pio 4 2 GPIO_ACTIVE_HIGH>, <&pio 6 9 GPIO_ACTIVE_HIGH>;
 
-	hx8369: hx8369@1 {
+	flash:mx25l25635e@0 {
+			compatible = "jedec,spi-nor";
+			reg = <0x0>;
+			spi-max-frequency = <50000000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+	};
+	panel: hx8369@1 {
 		compatible = "himax,hx8369a", "himax,hx8369";
-		reg = <1>;
+		reg = <0x1>;
 		spi-max-frequency = <50000000>;
 		spi-cpol;
 		spi-cpha;
 		gpios-reset = <&pio 4 13 GPIO_ACTIVE_HIGH>; // PE 13
 	};
 	msi001@2 {
-			compatible = "spidev";
-			spi-max-frequency = <10000000>;
-			reg = <2>;
+		compatible = "msi001";
+		spi-max-frequency = <10000000>;
+		reg = <0x2>;
 	};
-	pe4312@3 {
-			compatible = "spidev";
-			spi-max-frequency = <10000000>;
-			reg = <3>;
-	};
+	// pe4312@3 {
+	// 	compatible = "spidev";
+	// 	spi-max-frequency = <10000000>;
+	// 	reg = <0x3>;
+	// };
 };
 
 &lradc {
