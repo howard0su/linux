@@ -109,7 +109,7 @@
 
 		touch_led {
 			label = "licheepi:red:usr";
-			gpios = <&pio 1 5 GPIO_ACTIVE_LOW>; /* PB5 */
+			gpios = <&pio 4 11 GPIO_ACTIVE_LOW>; /* PE11 */
 		};
 
 		lna_switch {
@@ -130,8 +130,8 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 		
-		//             PC2                        PB10                        PE2                           PG9
-		cs-gpios = <&pio 2 2 GPIO_ACTIVE_HIGH>, <&pio 1 10 GPIO_ACTIVE_HIGH>, <&pio 4 2 GPIO_ACTIVE_HIGH>, <&pio 6 9 GPIO_ACTIVE_HIGH>;
+		//             PC2                        PB10                        PE2                           PE24
+		cs-gpios = <&pio 2 2 GPIO_ACTIVE_HIGH>, <&pio 1 10 GPIO_ACTIVE_HIGH>, <&pio 4 2 GPIO_ACTIVE_HIGH>, <&pio 4 24 GPIO_ACTIVE_HIGH>;
 		// PC1
 		sck-gpios = <&pio 2 1 0>;
 		// PC3 
@@ -204,7 +204,7 @@
 
 	rotary0 {
         compatible = "rotary-encoder";
-		gpios = <&pio 4 10 0>, <&pio 4 11 0>; /* PE10, PE11 */
+		gpios = <&pio 1 5 0>, <&pio 6 8 0>; /* PB5, PG8 */
         linux,axis = <0>; /* REL_X */
         rotary-encoder,encoding = "gray";
         rotary-encoder,relative-axis;
@@ -212,7 +212,7 @@
 
 	rotary1 {
         compatible = "rotary-encoder";
-		gpios = <&pio 4 9 0>, <&pio 4 12 0>; /* PE9, PE12 */
+		gpios = <&pio 6 6 0>, <&pio 6 12 0>; /* PG6, PG12 */
         linux,axis = <1>; /* REL_Y */
         rotary-encoder,encoding = "gray";
         rotary-encoder,relative-axis;
@@ -275,7 +275,7 @@
 	};
 
 	spi0_output: spi0_output_pins {
-		pins = "PC1", "PC3", "PC2", "PC0", "PB10", "PE2","PG9";
+		pins = "PC1", "PC3", "PC2", "PC0", "PB10", "PE2","PE24";
 		function = "gpio_out";
 		bias-pull-up;
 	};
