@@ -63,10 +63,18 @@
 	backlight: backlight {
 			compatible = "pwm-backlight";
 			pwms = <&pwm 0 50000 PWM_POLARITY_INVERTED>;
-			enable-gpios = <&pio 1 3 GPIO_ACTIVE_HIGH>; // PB3
-
+			power-supply = <&reg_lcd>;
+	
 			brightness-levels = <0 1 2 4 8 16 32 64 128 255>;
 			default-brightness-level = <9>;
+	};
+
+    reg_lcd: regulator-lcd {
+		compatible = "regulator-fixed";
+		regulator-name = "1v8";
+		gpio = <&pio 1 3 GPIO_ACTIVE_HIGH>; // PB3
+		enable-active-high;
+		regulator-boot-on;
 	};
 
 	// panel: panel {
@@ -152,20 +160,21 @@
 			spi-max-frequency = <100000>;
 			spi-cpol;
 			spi-cpha;
+			power-supply = <&reg_lcd>;
 			gpios-reset = <&pio 4 13 GPIO_ACTIVE_HIGH>; // PE 13
-			#address-cells = <1>;
-			#size-cells = <0>;
+			// #address-cells = <1>;
+			// #size-cells = <0>;
 
-			port@0 {
-				reg = <0>;
-				#address-cells = <1>;
-				#size-cells = <0>;
+			// port@0 {
+			// 	reg = <0>;
+			// 	#address-cells = <1>;
+			// 	#size-cells = <0>;
 
-				panel_input: endpoint@0 {
-					reg = <0>;
-					remote-endpoint = <&tcon0_out_lcd>;
-				};
-			};
+			// 	panel_input: endpoint@0 {
+			// 		reg = <0>;
+			// 		remote-endpoint = <&tcon0_out_lcd>;
+			// 	};
+			// };
 		};
 		msi001@2 {
 			compatible = "rohm,dh2228fv";
@@ -204,6 +213,9 @@
 
 	rotary0 {
         compatible = "rotary-encoder";
+        pinctrl-names = "default";
+        pinctrl-0 = <&rotary0_switch>;
+
 		gpios = <&pio 1 5 0>, <&pio 6 8 0>; /* PB5, PG8 */
         linux,axis = <0>; /* REL_X */
         rotary-encoder,encoding = "gray";
@@ -212,6 +224,8 @@
 
 	rotary1 {
         compatible = "rotary-encoder";
+        pinctrl-names = "default";
+        pinctrl-0 = <&rotary1_switch>;
 		gpios = <&pio 6 6 0>, <&pio 6 12 0>; /* PG6, PG12 */
         linux,axis = <1>; /* REL_Y */
         rotary-encoder,encoding = "gray";
@@ -279,7 +293,17 @@
 		function = "gpio_out";
 		bias-pull-up;
 	};
-	
+
+	rotary0_switch: rotary0_switch_pins {
+		pins = "PB5", "PG8";
+		function = "gpio_in";
+	};
+
+	rotary1_switch: rotary1_switch_pins {
+		pins = "PG6", "PG12";
+		function = "gpio_in";
+	};
+
 	// spi0_input: spi0_input_pins {
 	// 	pins = "PC0";
 	// 	function = "gpio_in";
@@ -298,12 +322,12 @@
 	status = "okay";
 };
 
-&tcon0_out {
-    tcon0_out_lcd: endpoint@0 {
-        reg = <0>;
-        remote-endpoint = <&panel_input>;
-    };
-};
+// &tcon0_out {
+//     tcon0_out_lcd: endpoint@0 {
+//         reg = <0>;
+//         remote-endpoint = <&panel_input>;
+//     };
+// };
 
 &codec {
 	allwinner,audio-routing =

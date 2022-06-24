@@ -10,6 +10,8 @@
  * warranty of any kind, whether express or implied.
  */
 
+#define DEBUG    1
+
 #include <linux/io.h>
 #include <linux/clk.h>
 #include <linux/gpio/driver.h>
@@ -731,6 +733,8 @@ static int sunxi_pmx_set_mux(struct pinctrl_dev *pctldev,
 		return -EINVAL;
 
 	sunxi_pmx_set(pctldev, g->pin, desc->muxval);
+
+	//dev_err(pctldev->dev, "%s(%d),%s(%d)\t\t= %s\n", g->name, g->pin, func->name, func->ngroups, desc->name); 
 
 	return 0;
 }
