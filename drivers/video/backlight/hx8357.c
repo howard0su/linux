@@ -70,6 +70,7 @@
 #define HX8357_SET_POWER_NORMAL		0xd2
 #define HX8357_SET_PANEL_RELATED	0xe9
 
+#define HX8369_SET_PIXEL_FORMAT				0x3a
 #define HX8369_SET_DISPLAY_BRIGHTNESS		0x51
 #define HX8369_WRITE_CABC_DISPLAY_VALUE		0x53
 #define HX8369_WRITE_CABC_BRIGHT_CTRL		0x55
@@ -191,6 +192,10 @@ static u8 hx8369_seq_set_address_mode[] = {
 
 static u8 hx8369_seq_vcom[] = {
 	HX8369_SET_VCOM, 0x0d, 0x0d,
+};
+
+static u8 hx8369_pixel_format[] = {
+	HX8369_SET_PIXEL_FORMAT, 0x77,
 };
 
 static u8 hx8369_seq_gip[] = {
@@ -470,6 +475,11 @@ static int hx8369_lcd_init(struct lcd_device *lcdev)
 		return ret;
 	usleep_range(10000, 12000);
 
+	ret = hx8357_spi_write_array(lcdev, hx8369_seq_power,
+				ARRAY_SIZE(hx8369_seq_power));
+	if (ret < 0)
+		return ret;
+
 	ret = hx8357_spi_write_array(lcdev, hx8369_seq_display_related,
 				ARRAY_SIZE(hx8369_seq_display_related));
 	if (ret < 0)
@@ -495,13 +505,18 @@ static int hx8369_lcd_init(struct lcd_device *lcdev)
 	if (ret < 0)
 		return ret;
 
-	ret = hx8357_spi_write_array(lcdev, hx8369_seq_power,
-				ARRAY_SIZE(hx8369_seq_power));
+	ret = hx8357_spi_write_array(lcdev, hx8369_seq_gamma_curve_related,
+				ARRAY_SIZE(hx8369_seq_gamma_curve_related));
 	if (ret < 0)
 		return ret;
 
 	ret = hx8357_spi_write_array(lcdev, hx8369_seq_set_dgc,
 				ARRAY_SIZE(hx8369_seq_set_dgc));
+	if (ret < 0)
+		return ret;
+
+	ret = hx8357_spi_write_array(lcdev, hx8369_pixel_format,
+				ARRAY_SIZE(hx8369_pixel_format));
 	if (ret < 0)
 		return ret;
 
@@ -513,11 +528,6 @@ static int hx8369_lcd_init(struct lcd_device *lcdev)
 	 * The controller needs 120ms to fully recover from exiting sleep mode
 	 */
 	msleep(120);
-
-	ret = hx8357_spi_write_array(lcdev, hx8369_seq_gamma_curve_related,
-				ARRAY_SIZE(hx8369_seq_gamma_curve_related));
-	if (ret < 0)
-		return ret;
 
 	ret = hx8357_spi_write_byte(lcdev, HX8357_EXIT_SLEEP_MODE);
 	if (ret < 0)
